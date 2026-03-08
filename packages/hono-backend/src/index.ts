@@ -5,6 +5,7 @@ import pino from 'pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
+import { registerDocsRoutes } from './common/openapi'
 import { registerRoutes } from './common/router'
 import { db, DbConnection } from './db'
 import { postFeedback } from './modules/feedback/feedback-routes'
@@ -56,6 +57,15 @@ const createServices = (db: DbConnection) => {
 
 registerServices(app, createServices(db))
 
-registerRoutes(app, [getReports, getReportsByStation, postReport, getStations, getLines, postFeedback])
+const routes = [getReports, getReportsByStation, postReport, getStations, getLines, postFeedback] as const
 
-export default app
+registerRoutes(app, [...routes])
+registerDocsRoutes(app, [...routes])
+
+export { app }
+
+export default {
+    fetch: app.fetch,
+    port: 3000,
+    hostname: '0.0.0.0',
+}
